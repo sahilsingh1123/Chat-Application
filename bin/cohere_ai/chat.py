@@ -5,6 +5,8 @@ Chat models available:
     - command-r7b-12-2024
     - command-a-03-2025
 """
+import asyncio
+import functools
 import os
 import cohere
 from dotenv import load_dotenv
@@ -30,6 +32,27 @@ class CohereChat(Chat):
 
         return res.message.content[0].text
 
+    def sync_stream_chat(self, msg):
+        # This uses the synchronous generator provided by the cohere API
+        response = self.co.chat_stream(
+            model=self._model,
+            messages=self._get_template(msg)
+        )
+        # for event in response:
+        #     # Check the event and accumulate content
+        #     if event and event.type == 'content-delta':
+        #         yield event.delta.message.content.text
+        return response
+
+    async def stream_chat(self, msg):
+        loop = asyncio.get_running_loop()
+        # Run the synchronous chat stream in a thread so as not to block the event loop
+        result = await loop.run_in_executor(
+            None,
+            functools.partial(self.sync_stream_chat, msg)
+        )
+        return result
+
     def _get_client(self):
         return cohere.ClientV2(API_KEY)
 
@@ -40,7 +63,7 @@ class CohereChat(Chat):
                 "content": msg
             },
             {
-                "role": "assistant",
+                "role": "system",
                 "content": ASSISTANT_ROLE
             }
         ]
