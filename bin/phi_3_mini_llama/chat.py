@@ -9,11 +9,11 @@ from dotenv import load_dotenv
 
 
 load_dotenv()
-MODEL_PATH = os.getenv('PHI_3_MINI_MODEL_PATH')
+MODEL_PATH = os.getenv('PHI_3_MINI_MODEL_PATH_LLAMA')
 ASSISTANT_ROLE = os.getenv('ASSISTANT_ROLE')
 
 # class Phi3MiniChat:
-class Phi3MiniChat(Chat):
+class Phi3MiniChatLlama(Chat):
     def __init__(self):
         # super().__init__()
         self._model = MODEL_PATH

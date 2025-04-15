@@ -1,6 +1,7 @@
 from .cohere_ai.chat import CohereChat
 from .openai.chat import OpenAIChat
-from .phi_3_mini.chat import Phi3MiniChat
+from .phi_3_mini_llama.chat import Phi3MiniChatLlama
+from .phi_3_mini_transformers.chat import Phi3MiniChatHF
 
 class ChatFactory:
     @staticmethod
@@ -9,7 +10,9 @@ class ChatFactory:
             return CohereChat()
         elif chat_type == 'openai':
             return OpenAIChat()
-        elif chat_type == 'phi3-mini':
-            return Phi3MiniChat()
+        elif chat_type == 'phi3-mini-llama':
+            return Phi3MiniChatLlama()
+        elif chat_type == 'phi3-mini-hf':
+            return Phi3MiniChatHF()
         else:
             raise ValueError(f"Invalid chat provider: {chat_type}")
