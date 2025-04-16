@@ -2,15 +2,17 @@
 This class contains the chat interface for
 openai API
 """
+
 from openai import OpenAI
 import os
 from dotenv import load_dotenv
 from ..chat_interface import Chat
 
 load_dotenv()
-API_KEY = os.getenv('OPENAI_API_KEY')
-MODEL_NAME = os.getenv('OPENAI_MODEL_NAME')
-ASSISTANT_ROLE = os.getenv('ASSISTANT_ROLE')
+API_KEY = os.getenv("OPENAI_API_KEY")
+MODEL_NAME = os.getenv("OPENAI_MODEL_NAME")
+ASSISTANT_ROLE = os.getenv("ASSISTANT_ROLE")
+
 
 class OpenAIChat(Chat):
     def __init__(self):
@@ -28,14 +30,8 @@ class OpenAIChat(Chat):
 
     def _get_template(self, msg):
         return [
-            {
-                "role": "system",
-                "content": ASSISTANT_ROLE
-            },
-            {
-                "role": "user",
-                "content": msg
-            },
+            {"role": "system", "content": ASSISTANT_ROLE},
+            {"role": "user", "content": msg},
         ]
 
     def _get_client(self):

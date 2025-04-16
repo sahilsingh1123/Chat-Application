@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 import os
 
 load_dotenv()
-CHAT_PROVIDER = os.getenv('CHAT_PROVIDER')
+CHAT_PROVIDER = os.getenv("CHAT_PROVIDER")
 
 
 @cl.on_message

@@ -1,0 +1,22 @@
+repos:
+  # Pre-commit hooks for basic text fixes (like fixing trailing whitespace, ensuring newlines, etc.)
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0  # Use the latest stable release or a specific version
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+
+  # Run Black for code formatting
+  - repo: https://github.com/psf/black
+    rev: 25.1.0
+    hooks:
+      - id: black
+        args: ["--line-length=79"]
+        language_version: python3.9  # Adjust this to match your project's Python version
+
+  # Run Flake8 for linting
+  - repo: https://github.com/PyCQA/flake8
+    rev: 7.2.0
+    hooks:
+      - id: flake8
+        args: ["--ignore=E501"]

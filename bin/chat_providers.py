@@ -2,17 +2,21 @@ from .cohere_ai.chat import CohereChat
 from .openai.chat import OpenAIChat
 from .phi_3_mini_llama.chat import Phi3MiniChatLlama
 from .phi_3_mini_transformers.chat import Phi3MiniChatHF
+from .tiny_llama.chat import TinyLlamaChat
+
 
 class ChatFactory:
     @staticmethod
     def get_chat(chat_type):
-        if chat_type == 'cohere':
+        if chat_type == "cohere":
             return CohereChat()
-        elif chat_type == 'openai':
+        elif chat_type == "openai":
             return OpenAIChat()
-        elif chat_type == 'phi3-mini-llama':
+        elif chat_type == "phi3-mini-llama":
             return Phi3MiniChatLlama()
-        elif chat_type == 'phi3-mini-hf':
+        elif chat_type == "phi3-mini-hf":
             return Phi3MiniChatHF()
+        elif chat_type == "tiny-llama":
+            return TinyLlamaChat()
         else:
             raise ValueError(f"Invalid chat provider: {chat_type}")
