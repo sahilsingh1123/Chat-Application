@@ -7,6 +7,8 @@ from openai import OpenAI
 import os
 from dotenv import load_dotenv
 from ..chat_interface import Chat
+from bin.constant import OPENAI
+from bin.chat_providers import ChatFactory
 
 load_dotenv()
 API_KEY = os.getenv("OPENAI_API_KEY")
@@ -14,6 +16,7 @@ MODEL_NAME = os.getenv("OPENAI_MODEL_NAME")
 ASSISTANT_ROLE = os.getenv("ASSISTANT_ROLE")
 
 
+@ChatFactory.register(OPENAI)
 class OpenAIChat(Chat):
     def __init__(self):
         super().__init__()

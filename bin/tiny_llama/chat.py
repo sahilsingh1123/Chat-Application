@@ -7,6 +7,8 @@ import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
 from bin.chat_interface import Chat
+from bin.chat_providers import ChatFactory
+from bin.constant import TINY_LLAMA
 
 from dotenv import load_dotenv
 import os
@@ -18,6 +20,7 @@ ASSISTANT_ROLE = os.getenv("ASSISTANT_ROLE")
 DEVICE = os.getenv("DEVICE")
 
 
+@ChatFactory.register(TINY_LLAMA)
 class TinyLlamaChat(Chat):
     def __init__(self):
         super().__init__()

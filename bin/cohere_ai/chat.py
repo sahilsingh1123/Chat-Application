@@ -12,6 +12,8 @@ import os
 import cohere
 from dotenv import load_dotenv
 from ..chat_interface import Chat
+from bin.constant import COHERE
+from bin.chat_providers import ChatFactory
 
 load_dotenv()
 API_KEY = os.getenv("COHERE_API_KEY")
@@ -19,6 +21,7 @@ MODEL_NAME = os.getenv("COHERE_MODEL_NAME")
 ASSISTANT_ROLE = os.getenv("ASSISTANT_ROLE")
 
 
+@ChatFactory.register(COHERE)
 class CohereChat(Chat):
     def __init__(self):
         super().__init__()

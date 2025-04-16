@@ -5,7 +5,9 @@ phi-3-mini API
 
 import os
 from llama_cpp import Llama
-from ..chat_interface import Chat
+from bin.chat_interface import Chat
+from bin.constant import PHI3_MINI_LLAMA
+from bin.chat_providers import ChatFactory
 from dotenv import load_dotenv
 
 
@@ -14,7 +16,7 @@ MODEL_PATH = os.getenv("PHI_3_MINI_MODEL_PATH_LLAMA")
 ASSISTANT_ROLE = os.getenv("ASSISTANT_ROLE")
 
 
-# class Phi3MiniChat:
+@ChatFactory.register(PHI3_MINI_LLAMA)
 class Phi3MiniChatLlama(Chat):
     def __init__(self):
         # super().__init__()

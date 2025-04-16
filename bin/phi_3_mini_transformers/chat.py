@@ -6,6 +6,8 @@ phi-3-mini API with hugging face transformers
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch
 from bin.chat_interface import Chat
+from bin.constant import PHI3_MINI_HF
+from bin.chat_providers import ChatFactory
 from dotenv import load_dotenv
 import os
 
@@ -15,6 +17,7 @@ ASSISTANT_ROLE = os.getenv("ASSISTANT_ROLE")
 DEVICE = os.getenv("DEVICE")
 
 
+@ChatFactory.register(PHI3_MINI_HF)
 class Phi3MiniChatHF(Chat):
     def __init__(self):
         super().__init__()

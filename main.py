@@ -12,6 +12,7 @@ async def main(message: cl.Message):
     # message is the object which contains data from the user
     # message.content = text provided by the user in the chatbox
     # custom logic go here
+    print(ChatFactory.available_chats())
     chat = ChatFactory.get_chat(CHAT_PROVIDER)
     response = chat.chat(message.content)
     # Start with an empty message and store a reference to it:
