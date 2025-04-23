@@ -8,6 +8,7 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 
 from bin.chat_interface import Chat
 from bin.chat_providers import ChatFactory
+from bin.chat_history_service import chat_history
 from bin.constant import TINY_LLAMA
 
 from dotenv import load_dotenv
@@ -43,11 +44,15 @@ class TinyLlamaChat(Chat):
         )
 
     def _get_template(self, msg):
-        return (
-            f"<|system|>\n{ASSISTANT_ROLE}<s>\n"
-            f"<|user|>\n{msg}<s>\n"
-            "<|assistant|>\n"  # This token indicates where the assistant's response should begin.
-        )
+        # prompt = ""
+        # for message in chat_history.get_history():
+        #     prompt += f"<|{message['role']}|>\n{message['content']}\n"
+        # prompt += "<|assistant|>\n"
+        prompt = chat_history.get_formatted_history()
+        prompt += f"<|user|>\n{msg}<s>\n"
+        prompt += "<|assistant|>\n"
+        print("Prompt:", prompt)
+        return prompt
 
     def chat(self, msg):
         tokens = self._tokenize_text(msg)

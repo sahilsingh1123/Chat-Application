@@ -1,5 +1,6 @@
 import chainlit as cl
 from bin.chat_providers import ChatFactory
+from bin.chat_history_service import chat_history
 from dotenv import load_dotenv
 import os
 
@@ -15,7 +16,10 @@ async def main(message: cl.Message):
     print(ChatFactory.available_chats())
     chat = ChatFactory.get_chat(CHAT_PROVIDER)
     response = chat.chat(message.content)
+    chat_history.add_user_message(message.content)
+    chat_history.add_system_message(response)
     # Start with an empty message and store a reference to it:
+    print(chat_history.get_formatted_history())
     await cl.Message(content=f"Received: {response}").send()
 
 
