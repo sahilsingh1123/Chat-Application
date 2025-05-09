@@ -1,0 +1,84 @@
+"""
+This class contains the chat interface for
+tiny-llama API
+"""
+
+import torch
+from transformers import (
+    AutoTokenizer,
+    AutoModelForCausalLM,
+    BitsAndBytesConfig,
+)
+
+from bin.chat_interface import Chat
+from bin.chat_providers import ChatFactory
+from bin.chat_history_service import chat_history
+from bin.constant import DEEPSEEK
+
+from dotenv import load_dotenv
+import os
+import re
+
+load_dotenv()
+MODEL_PATH = os.getenv("DEEPSEEK_MODEL_NAME")
+ASSISTANT_ROLE = os.getenv("ASSISTANT_ROLE")
+DEVICE = os.getenv("DEVICE")
+
+
+@ChatFactory.register(DEEPSEEK)
+class DeepSeekChat(Chat):
+    def __init__(self):
+        super().__init__()
+        self._model = MODEL_PATH
+        self._device = torch.device(
+            "mps" if torch.backends.mps.is_available() else "cpu"
+        )
+        self._llm = self._get_client()
+        self._tokenizers = self._get_tokenizers()
+
+    def _get_client(self):
+        # configure for bitsnbytes
+        bnb_config = BitsAndBytesConfig(
+            load_in_4bit=True,
+            bnb_4bit_use_double_quant=True,
+            bnb_4bit_quant_type="nf4",
+            bnb_4bit_compute_dtype=torch.bfloat16,
+        )
+        return AutoModelForCausalLM.from_pretrained(
+            self._model,
+            device_map=DEVICE,
+            quantization_config=bnb_config,
+            use_flash_attention=True,
+            torch_dtype=torch.bfloat16,
+        )
+
+    def _get_tokenizers(self):
+        return AutoTokenizer.from_pretrained(
+            self._model,
+            device_map=DEVICE,
+        )
+
+    def _get_template(self, msg):
+        pass
+
+    def _tokenize_text(self, msg):
+        return self._tokenizers(msg, return_tensors="pt").to(self._device)
+
+    def _decode_response(self, output_ids):
+        decoded_text = self._tokenizers.decode(
+            output_ids[0], skip_special_tokens=True
+        )
+        return decoded_text
+
+    def chat(self, msg):
+        output_ids = self._llm.generate(
+            self._tokenize_text(msg),
+            max_new_tokens=256,  # Maximum number of tokens the model can add
+            do_sample=True,  # Enable sampling for a more diverse output
+            temperature=0.7,  # Controls randomness (0.0 deterministic, higher more random)
+            top_k=50,  # Consider only the top k probabilities
+            top_p=0.95,  # Nucleus sampling: consider tokens until the cumulative probability reaches this value
+            eos_token_id=self._tokenizers.eos_token_id,  # End-of-sequence token to stop generation
+        )
+
+        return self._decode_response(output_ids)
