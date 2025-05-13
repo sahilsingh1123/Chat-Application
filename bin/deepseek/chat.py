@@ -15,6 +15,7 @@ from bin.chat_providers import ChatFactory
 from bin.chat_history_service import chat_history
 from bin.constant import DEEPSEEK
 
+from torch.quantization import quantize_dynamic
 from dotenv import load_dotenv
 import os
 import re
@@ -37,6 +38,17 @@ class DeepSeekChat(Chat):
         self._tokenizers = self._get_tokenizers()
 
     def _get_client(self):
+        return self._get_client_basic()
+
+    def _get_client_basic(self):
+        return AutoModelForCausalLM.from_pretrained(
+            self._model,
+            torch_dtype=torch.bfloat16,
+            low_cpu_mem_usage=True,
+            device_map=DEVICE,
+        )
+
+    def _get_client_bitsandbytes(self):
         # configure for bitsnbytes
         bnb_config = BitsAndBytesConfig(
             load_in_4bit=True,
@@ -50,6 +62,19 @@ class DeepSeekChat(Chat):
             quantization_config=bnb_config,
             use_flash_attention=True,
             torch_dtype=torch.bfloat16,
+        )
+
+    def _get_client_pytorch(self):
+        model = AutoModelForCausalLM.from_pretrained(
+            self._model,
+            torch_dtype=torch.bfloat16,
+            low_cpu_mem_usage=True,
+            device_map=DEVICE,
+        )
+        return quantize_dynamic(
+            model,
+            {torch.nn.Linear},
+            dtype=torch.qint8,
         )
 
     def _get_tokenizers(self):
