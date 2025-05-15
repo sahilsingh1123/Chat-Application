@@ -9,6 +9,7 @@ from transformers import (
     AutoModelForCausalLM,
     BitsAndBytesConfig,
 )
+from llama_cpp import Llama
 
 from bin.chat_interface import Chat
 from bin.chat_providers import ChatFactory
@@ -22,6 +23,7 @@ import re
 
 load_dotenv()
 MODEL_PATH = os.getenv("DEEPSEEK_MODEL_NAME")
+MODEL_PATH_GGUF = os.getenv("DEEPSEEK_MODEL_NAME_GGUF")
 ASSISTANT_ROLE = os.getenv("ASSISTANT_ROLE")
 DEVICE = os.getenv("DEVICE")
 
@@ -31,6 +33,10 @@ class DeepSeekChat(Chat):
     def __init__(self):
         super().__init__()
         self._model = MODEL_PATH
+        self._use_metal = True  # Use Metal GPU
+        self._n_ctx = 2048  # Context window size
+        self._n_threads = 4  # Number of CPU threads
+        self._use_gguf = True
         self._device = torch.device(
             "mps" if torch.backends.mps.is_available() else "cpu"
         )
@@ -38,7 +44,17 @@ class DeepSeekChat(Chat):
         self._tokenizers = self._get_tokenizers()
 
     def _get_client(self):
+        if self._use_gguf:
+            return self._get_client_llama()
         return self._get_client_basic()
+
+    def _get_client_llama(self):
+        return Llama(
+            model_path=MODEL_PATH_GGUF,
+            n_ctx=self._n_ctx,
+            n_threads=self._n_threads,
+            use_metal=self._use_metal,
+        )
 
     def _get_client_basic(self):
         return AutoModelForCausalLM.from_pretrained(
@@ -96,6 +112,8 @@ class DeepSeekChat(Chat):
         return decoded_text
 
     def chat(self, msg):
+        if self._use_gguf:
+            return self.chat_gguf_llama(msg)
         output_ids = self._llm.generate(
             self._tokenize_text(msg),
             max_new_tokens=256,  # Maximum number of tokens the model can add
@@ -107,3 +125,18 @@ class DeepSeekChat(Chat):
         )
 
         return self._decode_response(output_ids)
+
+    def chat_gguf_llama(self, msg):
+        try:
+            response = self._llm(
+                prompt=msg,
+                max_tokens=256,
+                temperature=0.7,
+                top_p=0.9,
+                stop=["</s>"],
+                stream=False,
+            )
+            return response.get("choices", [{}])[0].get("text", "").strip()
+        except Exception as e:
+            # Introspect and offer guidance
+            raise RuntimeError("Inference failed: " + str(e))

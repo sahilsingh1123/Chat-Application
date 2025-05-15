@@ -2,7 +2,7 @@ import os
 from llama_cpp import Llama
 
 
-class DeepSeekChat:
+class DeepSeekChatLLama:
     def __init__(
         self,
         model_path: str,
@@ -55,11 +55,11 @@ class DeepSeekChat:
 
 if __name__ == "__main__":
     # Example usage
-    mdl = DeepSeekChat(
+    mdl = DeepSeekChatLLama(
         "/Users/sahilsingh/coding/github_codes/deepseek-llm-7B-chat-GGUF/deepseek-llm-7b-chat.Q5_K_M.gguf",
         n_ctx=4096,
         n_threads=8,
         use_metal=True,
     )
-    user_prompt = "Hello, DeepSeek! How do you work?"
+    user_prompt = "Tell me about pytorch vs scikit-learn"
     print(mdl.chat(user_prompt))
